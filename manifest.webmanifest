@@ -1,14 +1,20 @@
 {
+  "id": "./",
   "name": "Планер",
   "short_name": "Планер",
-  "start_url": ".",
-  "scope": ".",
+  "description": "Задачи, календарь, смены, финансы и заметки в одном приложении.",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#EDF1F9",
+  "orientation": "any",
+  "background_color": "#276EF0",
   "theme_color": "#276EF0",
   "lang": "ru",
+  "categories": ["productivity", "lifestyle"],
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

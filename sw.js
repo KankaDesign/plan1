@@ -1,6 +1,6 @@
 // Кэш оболочки: приложение открывается и без сети. Данные при этом берутся из браузера, а в облако уходят при появлении связи.
-const C = 'planner-shell-v4';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './config.js', './privacy.html', './terms.html', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
+const C = 'squirrel-shell-v5';
+const SHELL = ['./', './index.html', './manifest.webmanifest', './config.js', './privacy.html', './terms.html', './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable-192.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(C).then((c) => Promise.all(SHELL.map((u) => c.add(u).catch(() => {})))));
   self.skipWaiting();

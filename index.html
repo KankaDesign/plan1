@@ -134,9 +134,10 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stro
 .chip{min-width:30px;height:30px;border-radius:10px;font-weight:700;font-size:13px;color:#fff;background:var(--c);display:grid;place-items:center;padding:0 8px}
 .hwl{margin:2px 0 6px}
 .hwr{display:flex;align-items:center;gap:10px;padding:5px 0}
-.hwr .chip{min-width:24px;height:24px;border-radius:8px;font-size:12px}
-.hwr span{flex:1;color:var(--mu);font-size:13px;min-width:0;word-break:break-word}
-.hwr span.ph{opacity:.55}
+.hwr .chip{flex:none;min-width:34px;width:34px;height:34px;font-size:14px;border-radius:11px}
+.hwr>button{flex:1;min-width:0;text-align:left;background:var(--card);border-radius:14px;padding:8px 12px;min-height:34px}
+.hwr>button span{flex:1;color:var(--tx);font-size:14px;min-width:0;word-break:break-word}
+.hwr>button .hwph{color:var(--mu);opacity:.8}
 /* fin, food */
 .fr{display:flex;gap:16px;align-items:center}
 .ringw{position:relative;width:104px;height:104px;flex:none}
@@ -307,7 +308,7 @@ body.dr{cursor:grabbing}.dsrc{opacity:.25}.dtg{outline:2px dashed var(--ac);outl
 .bcol{flex:1 1 0;display:flex;flex-direction:column;gap:16px}
 .blk{margin:0!important;width:100%}
 .nb{margin-top:16px}
-.bh{min-height:36px}.bm{flex:none}
+.bh{min-height:36px}.bh .bt{white-space:normal;overflow-wrap:anywhere;line-height:1.2}.bm{flex:none}
 .ib{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;flex:none}
 .ib:hover{background:var(--act)}.ib .d3{padding:0}
 .chv{display:inline-flex}
@@ -374,6 +375,8 @@ input[data-tm]{font-variant-numeric:tabular-nums;letter-spacing:.5px}
 .cbl{display:flex;flex-direction:column;gap:16px;margin-top:16px}.cbl:empty{display:none}
 .calb .cd{aspect-ratio:1/1.05;height:auto}.calb .cdt,.calb .bars{display:none}.calb .cd{background:var(--act)}.calb .cd.on{background:var(--ac)}
 .wide .calp{position:static}
+body::after{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:35;pointer-events:none}
+.t small svg{width:12px;height:12px;vertical-align:-1px}
 .fchip{border:1px solid var(--c);color:var(--c);background:none;border-radius:100px;padding:3px 12px;font-size:13px;font-weight:500}.fchip.on{background:var(--c);color:#fff}.fchip.add{--c:var(--mu)}
 .frow{display:flex;gap:8px;align-items:center;margin-top:4px}.frow label{flex:1;min-width:0}.frow input{margin-top:0}
 .sg{width:34px;height:34px;border-radius:50%;background:var(--act);font-weight:700;font-size:16px;flex:none}.sg.on{background:var(--ac);color:#fff}
@@ -445,9 +448,10 @@ const ic=(n,c='')=>`<svg class="i ${c}" viewBox="0 0 24 24">${I[n]}</svg>`;
 // ===== Данные =====
 function defPal(){return[{id:'p1',n:'Основная палитра',colors:['#276EF0','#8731FF','#00AF57','#FF6F31','#FC413D','#FFBE00','#7D879C']},{id:'p2',n:'Пастель',colors:['#E4EFFF','#EFE4FF','#DEF5E9','#FFECE4','#FFE6E6','#FFF7DE']}]}
 function newBlock(type,name,extra){
+ if(type==='prog'){type='hw';name=name||'Прогресс выполнения задач'}
  const b={id:uid(),type,name:name||'',c:'',col:false};
  const D={day:{name:'Сегодня',c:'#276EF0'},list:{c:'#FF6F31'},hw:{name:'ДЗ',c:'#00AF57',subs:[]},fin:{c:'#FFBE00'},notes:{name:'Заметки',c:'#8731FF',notes:[]},sched:{name:'Расписание',c:'#276EF0',items:[]},prog:{c:'#00AF57',items:[]},food:{name:'Питание',c:'#FC413D',goal:{k:2000,p:100,f:65,c:250},en:[]},calc:{name:'Сборы',col:true},wx:{name:'Погода'},cal:{name:'Календарь',days:{}},cnt:{c:'#276EF0',unit:'',hist:[]},text:{c:'#7D879C',text:''}};
- Object.assign(b,D[type]||{},extra||{});if(type==='list'||type==='prog'||type==='cnt'||type==='text'){b.items=b.items||[];}
+ Object.assign(b,D[type]||{},extra||{});if(name)b.name=name;if(type==='list'||type==='prog'||type==='cnt'||type==='text'){b.items=b.items||[];}
  return b}
 function seed(){
  const S={v:5,tasks:{},marks:{},cats:[{id:'work',n:'Рабочий',c:'#276EF0'},{id:'off',n:'Выходной',c:'#7D879C'}],dayCat:{},goals:{},hwst:[{id:'red',n:'Не сделано',c:'#FC413D'},{id:'yellow',n:'В процессе',c:'#FFBE00'},{id:'green',n:'Сделано',c:'#00AF57'}],bl:{},scr:[],pal:defPal(),
@@ -547,7 +551,7 @@ const scrTabs=()=>`<div class="seg">${S.scr.map(s=>`<button class="${s.id===V.sc
 // --- задачи
 function taskHTML(x){
  const c=x.c?hex(x.c):'';
- return`<div class="t ${c?'tc':'n'} ${x.done?'d':''}" data-sg="tk" data-si="${x.id}" style="${c?cs(c):''}">${x.time?`<span class="tm">${x.time}${x.time2?`<em>${x.time2}</em>`:''}</span>`:''}<button class="tt" data-a="ted" data-id="${x.id}">${esc(x.t)}${x.cm?`<small>${esc(x.cm)}</small>`:''}${x.out?`<small class="o">Итог: ${esc(x.out)}</small>`:''}</button><button class="ck" data-a="done" data-id="${x.id}" aria-label="Отметить">${x.done?ic('chk'):''}</button></div>`}
+ return`<div class="t ${c?'tc':'n'} ${x.done?'d':''}" data-sg="tk" data-si="${x.id}" style="${c?cs(c):''}">${x.time?`<span class="tm">${x.time}${x.time2?`<em>${x.time2}</em>`:''}</span>`:''}<button class="tt" data-a="ted" data-id="${x.id}">${esc(x.t)}${x.cm?`<small>${esc(x.cm)}</small>`:''}${x.out?`<small class="o">Итог: ${esc(x.out)}</small>`:''}${(x.rem||x.pin)?`<small>${x.rem?ic('bell')+' '+dl(x.rem.d)+', '+x.rem.t:''}${x.rem&&x.pin?' · ':''}${x.pin?'На виджете':''}</small>`:''}</button><button class="ck" data-a="done" data-id="${x.id}" aria-label="Отметить">${x.done?ic('chk'):''}</button></div>`}
 function marksHTML(d){return mkOf(d).map(m=>`<div class="mk" style="--c:${hex(m.c)}"><i></i><button class="tt" data-a="med" data-id="${m.id}">${esc(m.t)}</button><button class="x" data-a="mdel" data-id="${m.id}" aria-label="Удалить">×</button></div>`).join('')}
 const en=a=>`data-en="${a}"`;
 function addRow(){return`<div class="add"><input id="nt" readonly data-a="tsheet" placeholder="Новая задача" autocomplete="off"><button class="ci" data-a="tsheet" aria-label="Добавить задачу">+</button></div>`}
@@ -580,7 +584,7 @@ function listBody(b){
  return head2(b)+(b.col?'':`${b.items.length?b.items.map((x,j)=>`<div class="t ${x.c?'tc':'n'} ${x.done?'d':''}" style="${cs(x.c)}" data-sg="li${b.id}" data-si="${j}"><button class="tt" data-a="led" data-b="${b.id}" data-j="${j}">${esc(x.t)}</button><button class="ck" data-a="li" data-b="${b.id}" data-j="${j}" aria-label="Отметить">${x.done?ic('chk'):''}</button><button class="x" data-a="lid" data-b="${b.id}" data-j="${j}" aria-label="Удалить">×</button></div>`).join(''):'<div class="empty">Пока пусто.</div>'}<div class="add"><input id="li${b.id}" ${en('lia')} data-b="${b.id}" placeholder="Добавить" autocomplete="off"><button class="ci" data-a="lia" data-b="${b.id}">+</button></div>`)}
 function hwBody(b){
  const meta=b.col?'':'';
- return head2(b)+(b.col?'':`<div class="hwleg">${S.hwst.map(s=>`<span><i style="--c:${hex(s.c)}"></i>${esc(s.n)}</span>`).join('')}</div>${b.subs.map((h,i)=>`<div class="sub ${h.c?'cl':''}" style="${cs(h.c)}" data-sg="hw${b.id}" data-si="${i}"><button class="sh" data-a="hwopen" data-b="${b.id}" data-i="${i}"><span>${esc(h.n)}</span><span class="chips">${h.w.map((w,j)=>`<span class="chip" style="--c:${hex(hst(w.s).c)}" role="button" data-a="cyc" data-b="${b.id}" data-i="${i}" data-j="${j}">${j+1}</span>`).join('')}</span></button>${h.open?`<div class="hwl">${h.w.map((w,j)=>`<div class="hwr"><span class="chip" style="--c:${hex(hst(w.s).c)}" role="button" data-a="cyc" data-b="${b.id}" data-i="${i}" data-j="${j}">${j+1}</span><button style="flex:1;text-align:left" data-a="hwc" data-b="${b.id}" data-i="${i}" data-j="${j}"><span class="${w.c?'':'ph'}" style="display:block">${w.c?esc(w.c):'комментарий'}</span></button></div>`).join('')}<div class="row2" style="margin-top:6px"><button class="btn sm g" data-a="addw" data-b="${b.id}" data-i="${i}">+ Практическая</button><button class="btn sm g" data-a="hwe" data-b="${b.id}" data-i="${i}">Изменить</button></div></div>`:''}</div>`).join('')}<div class="add"><input id="ns${b.id}" ${en('adds')} data-b="${b.id}" placeholder="Новый предмет" autocomplete="off"><button class="ci" data-a="adds" data-b="${b.id}">+</button></div>`)}
+ return head2(b)+(b.col?'':`<div class="hwleg">${S.hwst.map(s=>`<span><i style="--c:${hex(s.c)}"></i>${esc(s.n)}</span>`).join('')}</div>${b.subs.map((h,i)=>`<div class="sub ${h.c?'cl':''}" style="${cs(h.c)}" data-sg="hw${b.id}" data-si="${i}"><button class="sh" data-a="hwopen" data-b="${b.id}" data-i="${i}"><span>${esc(h.n)}</span><span class="chips">${h.w.map((w,j)=>`<span class="chip" style="--c:${hex(hst(w.s).c)}" role="button" data-a="cyc" data-b="${b.id}" data-i="${i}" data-j="${j}">${j+1}</span>`).join('')}</span></button>${h.open?`<div class="hwl">${h.w.map((w,j)=>`<div class="hwr"><span class="chip" style="--c:${hex(hst(w.s).c)}" role="button" data-a="cyc" data-b="${b.id}" data-i="${i}" data-j="${j}">${j+1}</span><button style="flex:1;text-align:left" data-a="hwc" data-b="${b.id}" data-i="${i}" data-j="${j}"><span class="${w.c?'':'hwph'}" style="display:block">${w.c?esc(w.c):'комментарий'}</span></button></div>`).join('')}<div class="row2" style="margin-top:6px"><button class="btn sm g" data-a="addw" data-b="${b.id}" data-i="${i}">${b.name==='ДЗ'?'+ Практическая':'+ Пункт'}</button><button class="btn sm g" data-a="hwe" data-b="${b.id}" data-i="${i}">Изменить</button></div></div>`:''}</div>`).join('')}<div class="add"><input id="ns${b.id}" ${en('adds')} data-b="${b.id}" placeholder="${b.name==='ДЗ'?'Новый предмет':'Новая задача'}" autocomplete="off"><button class="ci" data-a="adds" data-b="${b.id}">+</button></div>`)}
 // --- финансы
 function finSums(b){const m=V.cm;const ms=(b.hist||[]).filter(h=>b.kind==='goal'||h.d.slice(0,7)===m);return ms}
 function finBody(b){
@@ -695,7 +699,17 @@ const SI={ok:'☁',saving:'⟳',err:'⚠'};
 function setSync(st){syncState=st;const b=document.getElementById('sync');if(b)b.textContent=SI[st]||'☁'}
 function accBtn(){return SB&&USER?`<button class="circ" id="sync" data-a="pg" data-v="cloud" aria-label="Синхронизация">${SI[syncState]}</button>`:''}
 function schedPush(){if(SB&&USER){setSync('saving');clearTimeout(syncT);syncT=setTimeout(push,1200)}}
-async function push(){if(!SB||!USER)return;setSync('saving');try{const{error}=await SB.from('planner_state').upsert({user_id:USER.id,data:S,updated_at:new Date().toISOString()});if(error)throw error;setSync('ok')}catch(e){setSync('err')}}
+async function push(){if(!SB||!USER)return;setSync('saving');try{const{error}=await SB.from('planner_state').upsert({user_id:USER.id,data:S,updated_at:new Date().toISOString()});if(error)throw error;setSync('ok');syncRem()}catch(e){setSync('err')}}
+const b64u=k=>{const p='='.repeat((4-k.length%4)%4),r=atob((k+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...r].map(c=>c.charCodeAt(0)))};
+const readRem=()=>{let d=val('erd');const t=tv('ert');if(t&&!d)d=V.sel;return d&&t?{d,t,x:val('erx').trim()}:undefined};
+function pinFix(){const a=[];for(const d in S.tasks)S.tasks[d].forEach(t=>{if(t.pin)a.push(t)});if(a.length<2)return;a.sort((x,y)=>(y.pt||0)-(x.pt||0));a.slice(1).forEach(t=>{t.pin=false})}
+let remKey='';
+async function syncRem(force){if(!SB||!USER)return;
+ const now=Date.now(),L=[];for(const d in S.tasks)S.tasks[d].forEach(t=>{if(t.rem&&t.rem.d&&t.rem.t&&!t.done){const at=new Date(t.rem.d+'T'+t.rem.t+':00').getTime();if(at>now-86400000)L.push({id:t.id,user_id:USER.id,fire_at:new Date(at).toISOString(),title:t.rem.x||t.t,body:t.rem.x?t.t:(t.cm||'')})}});
+ const key=JSON.stringify(L.map(x=>[x.id,x.fire_at,x.title,x.body]));if(!force&&key===remKey)return;
+ try{if(L.length){const{error}=await SB.from('reminders').upsert(L,{onConflict:'user_id,id'});if(error)throw error}
+  let q=SB.from('reminders').delete().eq('user_id',USER.id);if(L.length)q=q.not('id','in','('+L.map(x=>'"'+x.id+'"').join(',')+')');
+  const{error:e2}=await q;if(e2)throw e2;remKey=key}catch(e){}}
 async function pull(){
  if(!SB||!USER)return;
  try{const{data,error}=await SB.from('planner_state').select('data,updated_at').eq('user_id',USER.id).maybeSingle();if(error)throw error;
@@ -747,7 +761,7 @@ function pageHTML(n){
  if(n==='cats')return pgw('Категории дней',`<div class="mu" style="margin-bottom:8px">Категория красит число дня в календаре и показывается под датой.</div>${S.cats.map((c,i)=>`<div class="pbox"><input data-cn="${i}" value="${esc(c.n)}"><div class="dots">${allCols().slice(0,V.mc?99:10).map(k=>`<button class="dot ${hex(c.c)===k?'on':''}" style="--c:${k}" data-a="ccol" data-i="${i}" data-v="${k}"></button>`).join('')}${allCols().length>10?`<button class="dot more" data-a="mcol">${V.mc?'меньше':'ещё'}</button>`:''}</div><button class="btn sm r" style="margin-top:10px" data-a="cdel" data-i="${i}">Удалить</button></div>`).join('')}<button class="btn" data-a="cadd2">+ Категория</button>`);
  if(n==='hwst')return pgw('Статусы ДЗ',S.hwst.map((c,i)=>`<div class="pbox"><input data-sn="${i}" value="${esc(c.n)}"><div class="dots">${allCols().slice(0,V.mc?99:10).map(k=>`<button class="dot ${hex(c.c)===k?'on':''}" style="--c:${k}" data-a="scol" data-i="${i}" data-v="${k}"></button>`).join('')}${allCols().length>10?`<button class="dot more" data-a="mcol">${V.mc?'меньше':'ещё'}</button>`:''}</div>${S.hwst.length>1?`<button class="btn sm r" style="margin-top:10px" data-a="sdel" data-i="${i}">Удалить</button>`:''}</div>`).join('')+`<button class="btn" data-a="sadd">+ Статус</button>`);
  if(n==='shifts')return pgw('Типы смен',`<div class="mu" style="margin-bottom:8px">Смены красятся в календаре кистью, как категории дней, или по шаблону-ротации.</div><div class="lst">${S.sh.types.map(t=>`<button class="li" data-a="shedit" data-id="${t.id}"><span class="ico" style="${tint(t.c)};--c:${hex(t.c)}">${ic('bag')}</span><b>${esc(t.n)}<br><em style="font-weight:400">${t.s?t.s+'–'+t.e:'без времени'}${t.place?' · '+esc(t.place):''}</em></b><svg class="i ch2" viewBox="0 0 24 24">${I.fwd}</svg></button>`).join('')||'<div class="empty" style="padding:16px">Типов смен пока нет.</div>'}</div><button class="btn" data-a="shadd">+ Тип смены</button><div class="gt">Шаблоны (ротации)</div><div class="lst">${S.sh.tpl.map(t=>`<button class="li" data-a="tpedit" data-id="${t.id}"><b>${esc(t.n)}<br><em style="font-weight:400">${t.pat.map(id=>{const x=S.sh.types.find(z=>z.id===id);return x?x.n.slice(0,1):'–'}).join(' ')}</em></b><svg class="i ch2" viewBox="0 0 24 24">${I.fwd}</svg></button>`).join('')||'<div class="empty" style="padding:16px">Шаблонов пока нет.</div>'}</div><button class="btn g" data-a="tpadd">+ Шаблон</button><div class="lst" style="margin-top:16px">${sw(S.sh.show,'shshow','Показывать смены в календаре','','bag','#FF6F31')}</div>`);
- if(n==='notif')return pgw('Уведомления',`<div class="lst">${sw(S.notif.on,'notifsw','Напоминания о задачах','Работают, пока приложение открыто','bell','#FC413D')}</div><div class="info" style="background:var(--act)">${ic('info')}<span>Браузер сам присылает уведомления только пока вкладка или приложение открыты. Фоновые push-уведомления требуют отдельного сервера.</span></div>`);
+ if(n==='notif')return pgw('Уведомления',`<div class="lst">${sw(S.notif.on,'notifsw','Напоминания о задачах','Работают, пока приложение открыто','bell','#FC413D')}</div><div class="lst" style="margin-top:12px">${li('bell','#276EF0','Push-уведомления на этом устройстве',(()=>{try{return localStorage.getItem('squirrel-push')?'Включены':'Выключены'}catch(e){return'Выключены'}})(),'pushon','')}</div><div class="info" style="background:var(--act);margin-top:12px">${ic('info')}<span>Push приходят, даже когда приложение закрыто. На iPhone и iPad они работают, если Squirrel добавлен на экран «Домой». Напоминание задаётся в окне задачи: дата, время и текст.</span></div><div class="info" style="background:var(--act)">${ic('info')}<span>Браузер сам присылает уведомления только пока вкладка или приложение открыты. Фоновые push-уведомления требуют отдельного сервера.</span></div>`);
  if(n==='geo')return pgw('Погода и город',`<div class="pbox"><div class="mu">Сейчас: ${S.geo?esc(S.geo.name):'не выбран'}</div><div class="add"><input id="wxc" ${en('wxcity')} placeholder="Город"><button class="ci" data-a="wxcity">→</button></div><button class="lnk" style="text-align:left" data-a="wxgeo">Моё местоположение</button>${V.wxe?`<div class="err">${esc(V.wxe)}</div>`:''}${S.geo?`<button class="btn r" data-a="wxoff">Убрать город</button>`:''}</div><div class="info" style="background:var(--act)">${ic('info')}<span>Для прогноза координаты города отправляются в сервис Open-Meteo.</span></div>`);
  return''}
 // ===== Окна =====
@@ -759,8 +773,8 @@ function sheetHTML(){
  case'nb':h=`${x('Выберите новый блок')}${[['list','#276EF0','Список','Задачи и пункты, которые можно отмечать'],['fin','#FFBE00','Финансы','Траты, доходы и цели накоплений в одном месте'],['prog','#00AF57','Прогресс выполнения задач','Шкала готовности проекта по шагам'],['food','#FC413D','Питание','Приёмы пищи и калории за день'],['sched','#276EF0','Расписание','Дела на день по часам'],['notes','#8731FF','Заметки','Быстрые записи и мысли под рукой'],['wx','#7D879C','Погода','Прогноз на сегодня и ближайшие дни'],['cal','#7D879C','Календарь','Месяц целиком со всеми событиями'],['day','#276EF0','Задачи дня','Список задач выбранного дня']].map(([t,c,n,d])=>`<button class="opt" style="--c:${c}" data-a="nbpick" data-v="${t}"><div><b>${n}</b><span>${d}</span></div><span class="ci">+</span></button>`).join('')}`;break;
  case'nbn':h=`${x(s.title)}${FLD('bn','','',  'text','Название')}${s.t==='cnt'?FLD('bu','','','text','Единица (₽, км…)'):''}<button class="btn" data-a="nbmake">Добавить</button>`;break;
  case'nbf':h=`${x('Создать финансы')}${FLD('bn','','','text','Название')}<div class="fld">Вид</div><div class="cards2"><button class="kc ${s.kind!=='goal'?'on':''}" data-a="fkind" data-v="flow">Доходы и расходы</button><button class="kc ${s.kind==='goal'?'on':''}" data-a="fkind" data-v="goal">Цель</button></div>${s.kind==='goal'?`${FLD('ft','','', 'number','Сколько хотите накопить?')}${FLD('fs','','','number','Сколько уже есть?')}`:''}<button class="btn" data-a="nbmake">Добавить</button>`;break;
- case'task':{const o=s.id?find(s.id)[1]:{t:s.t||''};V.ec=V.ec===undefined?(o.c||''):V.ec;
-  h=`${x(s.id?'Задача':'Новая задача')}${FLD('et','',o.t||'','text','Название')}<textarea id="ec1" rows="2" placeholder="Заметка: что не забыть">${esc(o.cm||'')}</textarea>${s.id?`<textarea id="ec2" rows="2" placeholder="Итог: что сказали, что получилось">${esc(o.out||'')}</textarea>`:''}<div class="add"><label>с${TI('etm',o.time)}</label><label>до${TI('etm2',o.time2)}</label></div>${colorRow(V.ec,'pick')}${s.id?`<button class="btn" data-a="tsave">Сохранить</button><div class="row2"><button class="btn g" data-a="shx">Отмена</button><button class="btn r" data-a="tdel">Удалить</button></div>`:`<button class="btn" data-a="tnew" data-v="t">Добавить как задачу</button><button class="btn g" style="margin-top:0" data-a="tnew" data-v="m">Добавить как пометку</button>`}`;break}
+ case'task':{const o=s.id?find(s.id)[1]:{t:s.t||''},rm=o.rem||{};if(s.pin===undefined)s.pin=!!o.pin;V.ec=V.ec===undefined?(o.c||''):V.ec;
+  h=`${x(s.id?'Задача':'Новая задача')}${FLD('et','',o.t||'','text','Название')}<textarea id="ec1" rows="2" placeholder="Заметка: что не забыть">${esc(o.cm||'')}</textarea>${s.id?`<textarea id="ec2" rows="2" placeholder="Итог: что сказали, что получилось">${esc(o.out||'')}</textarea>`:''}<div class="add"><label>с${TI('etm',o.time)}</label><label>до${TI('etm2',o.time2)}</label></div><div class="fld" style="margin-top:6px">Напоминание (уведомление)</div><div class="add"><label>дата<input id="erd" type="date" value="${rm.d||''}"></label><label>время${TI('ert',rm.t)}</label></div>${FLD('erx','',rm.x||'','text','Текст напоминания (по умолчанию название задачи)')}<button class="chk ${s.pin?'on':''}" data-a="tpin" style="margin-top:6px;border:0"><span>Закрепить на виджете</span><span class="cb">${s.pin?ic('chk'):''}</span></button>${colorRow(V.ec,'pick')}${s.id?`<button class="btn" data-a="tsave">Сохранить</button><div class="row2"><button class="btn g" data-a="shx">Отмена</button><button class="btn r" data-a="tdel">Удалить</button></div>`:`<button class="btn" data-a="tnew" data-v="t">Добавить как задачу</button><button class="btn g" style="margin-top:0" data-a="tnew" data-v="m">Добавить как пометку</button>`}`;break}
  case'mark':{const o=(S.marks[V.sel]||[]).find(m=>m.id===s.id)||{};V.ec=V.ec===undefined?o.c:V.ec;h=`${x('Пометка дня')}${FLD('et','',o.t||'','text','Название')}${colorRow(V.ec,'pick',{none:false})}<button class="btn" data-a="msave">Сохранить</button><div class="row2"><button class="btn g" data-a="shx">Отмена</button><button class="btn r" data-a="mdel2">Удалить</button></div>`;break}
  case'bmenu':{const b=blk(s.b);h=`${x(esc(b.name||'Блок'))}<button class="mi" data-a="bedit" data-b="${b.id}">${ic('edit')}Изменить</button><button class="mi" data-a="bdup" data-b="${b.id}">${ic('copy')}Дублировать</button><button class="mi" data-a="btog2" data-b="${b.id}">${ic('fold')}${b.col?'Развернуть':'Свернуть'}</button>${b.type==='fin'?`<button class="mi" data-a="fhist" data-b="${b.id}">${ic('hist')}Посмотреть историю</button>`:''}${b.type==='cnt'?`<button class="mi" data-a="chist" data-b="${b.id}">${ic('hist')}Посмотреть историю</button>`:''}<button class="mi r" data-a="bdel" data-b="${b.id}">${ic('trash')}Удалить</button>`;break}
  case'bedit':{const b=blk(s.b);V.ec=V.ec===undefined?(b.c||''):V.ec;
@@ -893,11 +907,22 @@ H.bdel=(b)=>{const x=blk(b.dataset.b);ask(`Блок «${x.name||'без назв
 H.add=(b)=>{const i=rel(b),t=i.value.trim();if(!t)return'n';insertByTime(S.tasks[V.sel]=S.tasks[V.sel]||[],{id:uid(),t,time:'',time2:'',c:'',done:false,sc:V.scr});};
 H.done=(b)=>{const[,x]=find(b.dataset.id);if(x)x.done=!x.done};
 H.ted=(b)=>{V.sh={k:'task',id:b.dataset.id};V.ec=undefined;return'r'};
-H.tsave=()=>{const[,o]=find(V.sh.id),t=val('et').trim();if(t)o.t=t;o.time=tv('etm');o.time2=tv('etm2');o.cm=val('ec1').trim();o.out=val('ec2').trim();o.c=V.ec||'';o.fired=0;cl()};
-H.tdel=()=>{const id=V.sh.id,[,o]=find(id);ask(`Задача «${o.t}» будет удалена.`,()=>{const[k]=find(id);S.tasks[k]=S.tasks[k].filter(t=>t.id!==id);cl()});return'n'};
+H.tsave=()=>{const[,o]=find(V.sh.id),t=val('et').trim();if(t)o.t=t;o.time=tv('etm');o.time2=tv('etm2');o.cm=val('ec1').trim();o.out=val('ec2').trim();o.c=V.ec||'';o.fired=0;o.rem=readRem();o.pin=!!V.sh.pin;if(o.pin)o.pt=Date.now();pinFix();cl();syncRem()};
+H.tpin=()=>{V.sh.pin=!V.sh.pin;return'r'};
+H.pushon=async()=>{try{
+ if(!SB||!USER){toast('Сначала войдите в аккаунт');return}
+ if(!CFG.vapid){toast('В config.js не указан ключ vapid');return}
+ if(!('serviceWorker' in navigator)||!('PushManager' in window)){toast('Откройте Squirrel с экрана «Домой» (iOS 16.4 и новее)');return}
+ const p=await Notification.requestPermission();if(p!=='granted'){toast('Разрешение не выдано');return}
+ const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();
+ if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(CFG.vapid)});
+ const j=sub.toJSON(),{error}=await SB.from('push_subs').upsert({user_id:USER.id,endpoint:j.endpoint,sub:j});if(error)throw error;
+ try{localStorage.setItem('squirrel-push','1')}catch(e){}
+ await syncRem(true);toast('Уведомления включены')}catch(e){toast('Не удалось включить: '+(e.message||e))}render()};
+H.tdel=()=>{const id=V.sh.id,[,o]=find(id);ask(`Задача «${o.t}» будет удалена.`,()=>{const[k]=find(id);S.tasks[k]=S.tasks[k].filter(t=>t.id!==id);cl();syncRem()});return'n'};
 H.tnew=(b,e)=>{const t=val('et').trim();if(!t){const i=document.getElementById('et');if(i)i.focus();return'n'}const rapid=e&&e.detail===0&&b.dataset.v==='t';
  if(b.dataset.v==='m')(S.marks[V.sel]=S.marks[V.sel]||[]).push({id:uid(),t,c:V.ec||'#276EF0',sc:V.scr});
- else insertByTime(S.tasks[V.sel]=S.tasks[V.sel]||[],{id:uid(),t,time:tv('etm'),time2:tv('etm2'),cm:val('ec1').trim(),c:V.ec||'',done:false,sc:V.scr});if(rapid){save();V.sh={k:'task',t:'',rf:1};V.ec=undefined;toast('Добавлено');return'r'}cl()};
+ else insertByTime(S.tasks[V.sel]=S.tasks[V.sel]||[],{id:uid(),t,time:tv('etm'),time2:tv('etm2'),cm:val('ec1').trim(),c:V.ec||'',done:false,sc:V.scr,rem:readRem(),pin:!!V.sh.pin,pt:Date.now()});pinFix();syncRem();if(rapid){save();V.sh={k:'task',t:'',rf:1};V.ec=undefined;toast('Добавлено');return'r'}cl()};
 H.mv=()=>{const nx=add(V.sel,1),keep=[],mv=[];(S.tasks[V.sel]||[]).forEach(x=>((x.done||!(isMain()||x.sc===V.scr))?keep:mv).push(x));S.tasks[V.sel]=keep;S.tasks[nx]=(S.tasks[nx]||[]).concat(mv)};
 H.med=(b)=>{V.sh={k:'mark',id:b.dataset.id};V.ec=undefined;return'r'};
 H.msave=()=>{const o=(S.marks[V.sel]||[]).find(m=>m.id===V.sh.id),t=val('et').trim();if(t)o.t=t;o.c=V.ec||o.c;cl()};
@@ -1170,7 +1195,7 @@ function dEnd(){if(!DR)return;const{row,g,grp,si,over,dayT}=DR;g.remove();row.cl
  if(dayT&&grp==='tk'){const nd=dayT.dataset.v,[k,x]=find(si);if(x&&k!==nd){S.tasks[k]=S.tasks[k].filter(t=>t!==x);insertByTime(S.tasks[nd]=S.tasks[nd]||[],x);save();render();toast('Перенесено: '+dl(nd))}return}
  if(!over)return;const arr=arrOf(grp);if(!arr)return;const ix=k=>(grp==='blocks'||grp==='cblocks')?arr.indexOf(k):grp==='tk'?arr.findIndex(t=>t.id===k):+k;const a=ix(si),b=ix(over.dataset.si);
  if(a>=0&&b>=0&&a!==b){const[it]=arr.splice(a,1);arr.splice(b,0,it);save();render()}}
-document.addEventListener('touchstart',e=>{if(DR||e.touches.length>1)return;const row=dragTarget(e);if(!row)return;const t=e.touches[0];d0={row,x:t.clientX,y:t.clientY};clearTimeout(dtm);dtm=setTimeout(()=>{if(d0){dStart(d0.row,d0.x,d0.y);if(navigator.vibrate)navigator.vibrate(15)}},350)},{passive:true});
+document.addEventListener('touchstart',e=>{if(DR||e.touches.length>1)return;const row=dragTarget(e);if(!row)return;const t=e.touches[0];d0={row,x:t.clientX,y:t.clientY};clearTimeout(dtm);dtm=setTimeout(()=>{if(d0){dStart(d0.row,d0.x,d0.y);if(navigator.vibrate)navigator.vibrate(15)}},/blocks$/.test(row.dataset.sg)?700:380)},{passive:true});
 document.addEventListener('touchmove',e=>{const t=e.touches[0];if(DR){e.preventDefault();dMove(t.clientX,t.clientY);return}if(d0&&Math.hypot(t.clientX-d0.x,t.clientY-d0.y)>8){clearTimeout(dtm);d0=null}},{passive:false});
 document.addEventListener('touchend',()=>{clearTimeout(dtm);d0=null;dEnd()});document.addEventListener('touchcancel',()=>{clearTimeout(dtm);d0=null;dEnd()});
 document.addEventListener('mousedown',e=>{if(e.button!==0||DR)return;const row=dragTarget(e);if(row)d0={row,x:e.clientX,y:e.clientY,m:true}});

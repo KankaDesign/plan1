@@ -4,6 +4,8 @@
 window.PLANNER_CFG = {
   url: 'https://xxerdueuujjhdnnnsjqy.supabase.co',
   key: 'sb_publishable_781NXZH7stAFq6jGDh7Hrw_yvD7myJQ',
+  // Публичный VAPID-ключ для push-уведомлений (см. README, раздел «Уведомления»).
+  vapid: '',
   // Для юридических страниц: кто владелец сервиса и куда писать по вопросам данных.
   operator: '',
   contact: ''
